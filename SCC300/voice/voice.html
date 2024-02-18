@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Speech Feedback Form</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+
+  <!-- Popup with Instructions -->
+  <div id="instructionPopup" class="dark-mode-page">
+    <div class="popup-content">
+      <div class="close-icon" onclick="closeInstructionPopup()">✕</div>
+      <p>Instructions for giving feedback:</p>
+      <ul>
+        <li>Choose feedback type: Positive/Negative</li>
+        <li>Click the microphone to start voice recognition</li>
+        <li>Type additional comments if needed</li>
+        <li>Submit your feedback</li>
+      </ul>
+    </div>
+  </div>
+
+  <div id="settingsIcon" onclick="toggleDarkModePage()">&#9881;</div>
+
+  <div class="container">
+    <h1>Speech Feedback Form</h1>
+    <p>We value your feedback! Please take a moment to let us know how we're doing.</p>
+
+    <form id="feedbackForm" action="connect.php" method="post">
+      <label>
+        <input type="radio" name="feedbackType" value="positive"> Positive
+      </label>
+      <label>
+        <input type="radio" name="feedbackType" value="negative"> Negative
+      </label>
+    
+      <img id="microphoneIcon" src="microphone.png" alt="Microphone" onclick="startSpeechRecognition()">
+      <textarea id="feedbackText" name="feedbackText" rows="4" placeholder="Your feedback will be transcribed here..."></textarea>    
+      <input type="submit" value="Submit">
+    </form>
+    
+  
+
+    <div id="thankYouMessage" class="hidden">
+      <p>Thank you for your feedback!</p>
+    </div>
+
+  </div>
+
+  <div class="dark-mode-page" id="darkModePage">
+    <div class="close-icon" onclick="toggleDarkModePage()">✕</div>
+    <label for="darkModeToggle">Dark Mode:</label>
+    <input type="checkbox" id="darkModeToggle" onchange="toggleDarkMode()">
+  </div>
+
+  <script>
+    let recognition;
+    function startSpeechRecognition() {
+      recognition = new webkitSpeechRecognition(); // For browsers that support the Web Speech API
+      recognition.lang = 'en-US';
+
+      recognition.onresult = function(event) {
+        const transcript = event.results[0][0].transcript;
+        document.getElementById('feedbackText').value = transcript;
+      };
+
+      recognition.onend = function() {
+        recognition.stop();
+      };
+
+      recognition.start();
+    }
+
+    function toggleDarkModePage() {
+      const darkModePage = document.getElementById('darkModePage');
+      darkModePage.style.display = (darkModePage.style.display === 'none') ? 'flex' : 'none';
+    }
+
+    function toggleDarkMode() {
+      const body = document.body;
+      const container = document.querySelector('.container');
+      const darkModeToggle = document.getElementById('darkModeToggle');
+      const submitButton = document.querySelector('input[type="submit"]');
+
+      if (darkModeToggle.checked) {
+        body.classList.add('dark-mode');
+        container.classList.add('dark-mode');
+        submitButton.classList.add('dark-mode');
+      } else {
+        body.classList.remove('dark-mode');
+        container.classList.remove('dark-mode');
+        submitButton.classList.remove('dark-mode');
+      }
+    }
+
+    function submitFeedback(event) {
+      event.preventDefault(); // Prevents the form from submitting the traditional way
+
+      const feedbackType = document.querySelector('input[name="feedbackType"]:checked');
+      const feedbackText = document.getElementById('feedbackText').value;
+
+      // You can process and store this feedback data in your database here
+      console.log("Feedback Type:", feedbackType.value);
+      console.log("Speech Feedback:", feedbackText);
+
+      // Display thank you message
+      document.getElementById('feedbackForm').style.display = 'none';
+      document.getElementById('thankYouMessage').style.display = 'block';
+    }
+
+    function closeInstructionPopup() {
+      document.getElementById('instructionPopup').style.display = 'none';
+    }
+
+    function showInstructionPopup() {
+      document.getElementById('instructionPopup').style.display = 'flex';
+    }
+
+    // Display instruction popup when the page loads
+    window.onload = showInstructionPopup;
+  </script>
+
+</body>
+</html>

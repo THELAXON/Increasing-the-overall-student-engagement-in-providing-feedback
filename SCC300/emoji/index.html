@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+  <head>
+    <meta charset="utf-8">  
+    <title>QR Code Generator</title>
+    <link rel="stylesheet" href="style.css">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  </head>
+  <body>
+    <div class="wrapper">
+      <header>
+        <h1>QR Code Generator</h1>
+        <p>Paste a URL or enter text to create QR code</p>
+      </header>
+      <div class="form">
+        <input type="text" spellcheck="false" placeholder="Enter text or URL">
+        <button>Generate QR Code</button>
+      </div>
+      <div class="qr-code">
+        <img src="" alt="QR code">
+      </div>
+    </div>
+
+    <script>
+      const wrapper = document.querySelector(".wrapper"),
+            qrInput = wrapper.querySelector(".form input"),
+            generateBtn = wrapper.querySelector(".form button"),
+            qrImg = wrapper.querySelector(".qr-code img");
+      let preValue;
+
+      generateBtn.addEventListener("click", () => {
+        let qrValue = qrInput.value.trim();
+        if (!qrValue || preValue === qrValue) return;
+        preValue = qrValue;
+        generateBtn.innerText = "Generating QR Code...";
+        qrImg.src = `https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=${qrValue}`;
+        qrImg.addEventListener("load", () => {
+          wrapper.classList.add("active");
+          generateBtn.innerText = "Generate QR Code";
+        });
+      });
+
+      qrInput.addEventListener("keyup", () => {
+        if (!qrInput.value.trim()) {
+          wrapper.classList.remove("active");
+          preValue = "";
+        }
+      });
+    </script>
+  </body>
+</html>

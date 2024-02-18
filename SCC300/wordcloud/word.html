@@ -1,0 +1,24 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="styles.css">
+    <title>Anonymous Word Cloud Feedback Form</title>
+</head>
+<body>
+    <div class="container" id="form-container">
+        <h1>Feedback Form</h1>
+        <form action="submit_feedback.php" method="post">
+            <input type="text" id="word1" name="word1" placeholder="Word 1" required>
+            <input type="text" id="word2" name="word2" placeholder="Word 2" required>
+            <input type="text" id="word3" name="word3" placeholder="Word 3" required>
+            <button type="submit">Submit</button>
+        </form>
+    </div>
+    <div id="wordcloud-container" style="display: none;">
+        <!-- Word cloud will be displayed here after submitting the form -->
+    </div>
+    <script src="wordcloud.js"></script>
+</body>
+</html>
