@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">  
+  <title>Word Cloud Generator</title>
+  <!-- Include dashboard.css -->
+  <link rel="stylesheet" href="dashboard.css">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+</head>
+<body>
+  <div class="wrapper">
+    <header>
+      <h1>Word Cloud Generator</h1>
+      <p>Paste a URL or enter text to create QR code</p>
+    </header>
+    <div class="form">
+      <input type="text" spellcheck="false" placeholder="Enter IP address" id="qrInput">
+      <select id="feedbackType">
+        <option value="wordcloud">Word Cloud</option>
+        <option value="voice">Voice Feedback</option>
+        <option value="emoji">Emoji Feedback</option>
+        <!-- Add more options for different feedback forms -->
+      </select>
+      <button id="generateBtn">Generate QR Code</button>
+    </div>
+    <div class="qr-code">
+      <img id="qrImg" src="" alt="QR code">
+    </div>
+    <div class="report">
+      <button id="generateReportBtn" class="generate-btn" style="display: none;">Generate Report</button>
+    </div>
+  </div>
+
+  <script src="https://d3js.org/d3.v7.min.js"></script>
+  <script src="https://rawgit.com/jasondavies/d3-cloud/master/build/d3.layout.cloud.js"></script>
+  <script>
+    document.addEventListener("DOMContentLoaded", function () {
+      const generateBtn = document.getElementById("generateBtn");
+      const generateReportBtn = document.getElementById("generateReportBtn");
+      const qrInput = document.getElementById("qrInput");
+      const feedbackTypeSelect = document.getElementById("feedbackType");
+      const qrImg = document.getElementById("qrImg");
+
+      generateBtn.addEventListener("click", () => {
+        let qrValue = qrInput.value.trim();
+        let selectedFeedbackType = feedbackTypeSelect.value;
+
+        if (!qrValue) return;
+
+        // Construct the QR code URL based on the input IP address, feedback type, and file location (SCC300)
+        let qrUrl = `https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=${qrValue}/SCC300/${selectedFeedbackType}.html`;
+
+        qrImg.src = qrUrl;
+        qrImg.onload = () => {
+          document.querySelector(".wrapper").classList.add("active");
+          generateReportBtn.style.display = "block"; // Show the "Generate Report" button
+        };
+      });
+
+      generateReportBtn.addEventListener("click", () => {
+        let selectedFeedbackType = feedbackTypeSelect.value;
+        if (selectedFeedbackType === "wordcloud") {
+        // Open a new tab
+        const wordCloudWindow = window.open('about:blank', '_blank');
+        wordCloudWindow.document.write('<!DOCTYPE html><html lang="en"><head><meta charset="UTF-8"><title>Word Cloud</title><link rel="stylesheet" href="dashboard.css"></head><body>');
+
+        // Create word cloud container
+        const wordCloudContainer = wordCloudWindow.document.createElement("div");
+        wordCloudContainer.classList.add("wordcloud-container");
+        wordCloudContainer.id = "wordCloudContainer";
+        wordCloudWindow.document.body.appendChild(wordCloudContainer);
+
+          // Continue with the rest of your code to fetch data and build the word cloud
+
+          // Fetch data from wordcloud_report.php and build the word cloud using D3.js
+          fetch('wordcloud_report.php')
+            .then(response => response.json())
+            .then(data => {
+              // Process data to get word frequencies
+              const wordFreq = {};
+              data.forEach(word => {
+                wordFreq[word] = (wordFreq[word] || 0) + 1;
+              });
+
+              // Convert word frequencies to word cloud format
+              const words = Object.keys(wordFreq).map(word => {
+                return { text: word, size: wordFreq[word] * 10 }; // Adjust size as needed
+              });
+
+              // Use d3.layout.cloud to generate word cloud layout
+              const width = 500;
+              const height = 500;
+              d3.layout.cloud().size([width, height])
+                .words(words)
+                .padding(5)
+                .rotate(function() { return ~~(Math.random() * 2) * 90; })
+                .font("Poppins")
+                .fontSize(function(d) { return d.size; })
+                .on("end", draw)
+                .start();
+
+              function draw(words) {
+                const svg = wordCloudWindow.document.createElementNS("http://www.w3.org/2000/svg", "svg");
+                svg.setAttribute("width", width);
+                svg.setAttribute("height", height);
+                wordCloudContainer.appendChild(svg);
+
+                const wordCloudSvg = d3.select(svg);
+                wordCloudSvg.append("g")
+                  .attr("transform", `translate(${width / 2}, ${height / 2})`)
+                  .selectAll("text")
+                  .data(words)
+                  .enter().append("text")
+                  .style("font-size", function(d) { return d.size + "px"; })
+                  .style("fill", function(d, i) { return getRandomColor(); })
+                  .attr("text-anchor", "middle")
+                  .attr("transform", function(d) {
+                    return `translate(${d.x}, ${d.y})rotate(${d.rotate})`;
+                  })
+                  .text(function(d) { return d.text; });
+              }
+            })
+            .catch(error => console.error('Error fetching word cloud data:', error));
+
+          wordCloudWindow.document.write('</body></html>');
+        } else if (selectedFeedbackType === "emoji") {
+          // Open emoji_report.php in a new tab
+          window.open("emoji_report.php", "_blank");
+        } else if (selectedFeedbackType === "voice") {
+          // Open emoji_report.php in a new tab
+          window.open("voice_report.php", "_blank");
+        }else {
+          // Handle other feedback types here (e.g., voice, emoji)
+          alert(`Generating report for ${selectedFeedbackType}.html`);
+        }
+      });
+
+      // Function to generate a random color
+      function getRandomColor() {
+        var letters = '0123456789ABCDEF';
+        var color = '#';
+        for (var i = 0; i < 6; i++) {
+          color += letters[Math.floor(Math.random() * 16)];
+        }
+        return color;
+      }
+    });
+  </script>
+</body>
+</html>

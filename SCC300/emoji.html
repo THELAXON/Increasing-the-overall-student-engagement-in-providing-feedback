@@ -1,0 +1,200 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Feedback Survey</title>
+    <link rel="stylesheet" href="emoji.css">
+    <link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons">
+</head>
+<body class="light-mode"> <!-- Initially set to light mode -->
+    <div class="container">
+        <h2>Feedback Survey</h2>
+        <form id="feedbackForm" action="emoji_feedback.php" method="post">
+            <label id="questionLabel">How well did you understand today's lecture?</label>
+
+            <div class="feedback-meter">
+                <div class="line"></div>
+                <div class="emoji-container">
+                    <div id="emoji1" class="emoji" data-emoji="😞" onclick="selectEmoji('emoji1')">😞</div>
+                    <div id="emoji2" class="emoji" data-emoji="😐" onclick="selectEmoji('emoji2')">😐</div>
+                    <div id="emoji3" class="emoji" data-emoji="😊" onclick="selectEmoji('emoji3')">😊</div>
+                </div>
+            </div>
+
+            <input type="hidden" name="q1" id="q1" value="">
+            <input type="hidden" name="q2" id="q2" value="">
+            <input type="hidden" name="q3" id="q3" value="">
+
+            <div class="navigation">
+                <button type="button" id="prevButton" onclick="prevQuestion()" style="display: none;">Previous</button>
+                <button type="button" id="nextButton" onclick="nextQuestion()">Next</button>
+                <button type="submit" id="submitButton" style="display: none;">Submit Feedback</button>
+            </div>
+
+            <div class="mode-toggle">
+                <button type="button" id="modeToggleBtn" onclick="toggleMode()">
+                    <i id="modeIcon" class="material-icons">dark_mode</i>
+                </button>                
+            </div>
+
+        </form>
+    </div>
+
+    <script>
+        let currentQuestion = 0;
+        const questions = [
+            "How well did you understand today's lecture?",
+            "How engaged were you during the class?",
+            "How clear were the explanations provided?"
+        ];
+
+        document.getElementById("questionLabel").textContent = questions[currentQuestion];
+
+        // Initialize an array to store the selected emojis for each question
+        const selectedEmojis = Array(questions.length).fill(null);
+
+        function prevQuestion() {
+            if (currentQuestion > 0) {
+                currentQuestion--;
+                updateQuestion();
+            }
+        }
+
+        function nextQuestion() {
+            if (currentQuestion < questions.length - 1) {
+                currentQuestion++;
+                updateQuestion();
+            } else {
+                // If it's the last question, display the submit button
+                document.getElementById("submitButton").style.display = "inline-block";
+                // Hide the next button
+                document.getElementById("nextButton").style.display = "none";
+            }
+        }
+
+        function updateQuestion() {
+            document.getElementById("questionLabel").textContent = questions[currentQuestion];
+
+            // Hide or show previous/next buttons based on the current question
+            document.getElementById("prevButton").style.display = currentQuestion === 0 ? "none" : "inline-block";
+            document.getElementById("nextButton").style.display = currentQuestion === questions.length - 1 ? "none" : "inline-block";
+
+            // Display the submit button on the last question
+            document.getElementById("submitButton").style.display = currentQuestion === questions.length - 1 ? "inline-block" : "none";
+
+            clearSelection();
+
+            // Set the selected emoji if previously chosen for this question
+            const selectedEmoji = selectedEmojis[currentQuestion];
+            if (selectedEmoji) {
+                selectEmoji(selectedEmoji);
+            }
+        }
+
+        function convertToDatabaseValue(emoji) {
+            switch (emoji) {
+                case "😞":
+                    return "bad";
+                case "😐":
+                    return "neutral";
+                case "😊":
+                    return "good";
+                default:
+                    return null;
+            }
+        }
+
+        function submitFeedback() {
+            // Get the selected emoji for the current question
+            const selectedEmoji = getSelectedEmoji();
+
+            // Convert emoji to a database-friendly value
+            const dbValue = convertToDatabaseValue(selectedEmoji);
+
+            // Store the converted value in the array for the current question
+            selectedEmojis[currentQuestion] = dbValue;
+
+            // Update hidden input fields with the converted values
+            document.getElementById("q1").value = selectedEmojis[0];
+            document.getElementById("q2").value = selectedEmojis[1];
+            document.getElementById("q3").value = selectedEmojis[2];
+        }
+
+        function clearSelection() {
+            // Remove 'selected' class from all emojis
+            document.querySelectorAll('.emoji').forEach(emoji => {
+                emoji.classList.remove('selected');
+            });
+        }
+
+        function selectEmoji(emojiId) {
+            // Get the selected emoji element
+            const selectedEmojiElement = document.getElementById(emojiId);
+
+            // Check if the element exists before proceeding
+            if (selectedEmojiElement) {
+                // Get the selected emoji for the current question
+                const selectedEmoji = selectedEmojiElement.getAttribute('data-emoji');
+
+                // Convert emoji to a database-friendly value
+                const dbValue = convertToDatabaseValue(selectedEmoji);
+
+                // Store the converted value in the array for the current question
+                selectedEmojis[currentQuestion] = dbValue;
+
+                // Remove 'selected' class from all emojis
+                document.querySelectorAll('.emoji').forEach(emoji => {
+                    emoji.classList.remove('selected');
+                });
+
+                // Add 'selected' class to the clicked emoji
+                selectedEmojiElement.classList.add('selected');
+            }
+        }
+
+        function toggleMode() {
+            const modeIcon = document.getElementById("modeIcon");
+
+            if (document.body.classList.contains("dark-mode")) {
+                // Switch to light mode
+                document.body.classList.remove("dark-mode");
+                modeIcon.textContent = "dark_mode";
+            } else {
+                // Switch to dark mode
+                document.body.classList.add("dark-mode");
+                modeIcon.textContent = "light_mode";
+            }
+        }
+
+        function getSelectedEmoji() {
+            const selectedEmojiElement = document.querySelector('.emoji.selected');
+            return selectedEmojiElement ? selectedEmojiElement.getAttribute('data-emoji') : null;
+        }
+
+        // Add an event listener to handle form submission
+        document.getElementById("feedbackForm").addEventListener("submit", function(event) {
+            // Prevent the default form submission to allow AJAX or manual handling
+            event.preventDefault();
+
+            // Call the submitFeedback function
+            submitFeedback();
+
+            // Submit the form
+            document.getElementById("feedbackForm").submit();
+        });
+
+        // Add an event listener for the submit button
+        document.getElementById("submitButton").addEventListener("click", function(event) {
+            // Prevent the default click behavior to allow AJAX or manual handling
+            event.preventDefault();
+
+            // Call the submitFeedback function
+            submitFeedback();
+
+            // Submit the form
+            document.getElementById("feedbackForm").submit();
+        });
+    </script>
+</body>
+</html>
