@@ -42,23 +42,38 @@ $conn->close();
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Feedback Report</title>
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600&display=swap" rel="stylesheet">
     <style>
-        /* Include Poppins font */
-        @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap');
-
-        /* Apply Poppins font to all text */
-        body, th, td {
+        body {
             font-family: 'Poppins', sans-serif;
+            background-color: #333;
+            color: #fff;
+        }
+        h2,h3 {
+            text-align: center;
+        }
+        .chart-container {
+            display: flex;
+            justify-content: space-around;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+        .chart {
+            width: 30%;
+        }
+        table {
+            margin: 0 auto;
+            width: 50%;
         }
     </style>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 </head>
 <body>
     <h2>Feedback Report</h2>
-    
-    <!-- Pie chart for feedback types -->
-    <div style="width: 30%;">
-        <canvas id="feedbackChart"></canvas>
+    <div class="chart-container">
+        <div class="chart">
+            <canvas id="feedbackChart"></canvas>
+        </div>
     </div>
 
     <!-- Table for comments -->
@@ -95,6 +110,15 @@ $conn->close();
                     data: <?php echo json_encode($feedbackCounts); ?>,
                     backgroundColor: ['#36A2EB', '#FF6384']
                 }]
+            },
+            options: {
+                plugins: {
+                    legend: {
+                        labels: {
+                            color: 'white'
+                        }
+                    }
+                }
             }
         });
     </script>

@@ -48,18 +48,40 @@ $conn->close();
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Feedback Report</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Poppins', sans-serif;
+            background-color: #333;
+            color: #fff;
+        }
+        h2 {
+            text-align: center;
+        }
+        .chart-container {
+            display: flex;
+            justify-content: space-around;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+        .chart {
+            width: 30%;
+        }
+    </style>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 </head>
 <body>
     <h2>Feedback Report</h2>
-    <div style="width: 25%;">
-        <canvas id="question1Chart"></canvas>
-    </div>
-    <div style="width: 25%;">
-        <canvas id="question2Chart"></canvas>
-    </div>
-    <div style="width: 25%;">
-        <canvas id="question3Chart"></canvas>
+    <div class="chart-container">
+        <div class="chart">
+            <canvas id="question1Chart"></canvas>
+        </div>
+        <div class="chart">
+            <canvas id="question2Chart"></canvas>
+        </div>
+        <div class="chart">
+            <canvas id="question3Chart"></canvas>
+        </div>
     </div>
 
     <script>
@@ -71,8 +93,17 @@ $conn->close();
                     data: <?php echo json_encode($q1Values); ?>,
                     backgroundColor: ['#FF6384', '#36A2EB', '#FFCE56']
                 }]
+            },options: {
+            plugins: {
+                legend: {
+                    labels: {
+                        color: 'white'
+                    }
+                }
             }
+        }
         });
+        
 
         var question2Chart = new Chart(document.getElementById('question2Chart'), {
             type: 'pie',
@@ -82,8 +113,17 @@ $conn->close();
                     data: <?php echo json_encode($q2Values); ?>,
                     backgroundColor: ['#FF6384', '#36A2EB', '#FFCE56']
                 }]
+            },options: {
+            plugins: {
+                legend: {
+                    labels: {
+                        color: 'white'
+                    }
+                }
             }
+        }
         });
+        
 
         var question3Chart = new Chart(document.getElementById('question3Chart'), {
             type: 'pie',
@@ -93,8 +133,17 @@ $conn->close();
                     data: <?php echo json_encode($q3Values); ?>,
                     backgroundColor: ['#FF6384', '#36A2EB', '#FFCE56']
                 }]
+            },options: {
+            plugins: {
+                legend: {
+                    labels: {
+                        color: 'white'
+                    }
+                }
             }
+        }
         });
+        
     </script>
 </body>
 </html>

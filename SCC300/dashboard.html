@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="utf-8">  
-  <title>Word Cloud Generator</title>
+  <title>QR Code Generator</title>
   <!-- Include dashboard.css -->
   <link rel="stylesheet" href="dashboard.css">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -10,7 +10,7 @@
 <body>
   <div class="wrapper">
     <header>
-      <h1>Word Cloud Generator</h1>
+      <h1>QR Code Generator</h1>
       <p>Paste a URL or enter text to create QR code</p>
     </header>
     <div class="form">
@@ -48,7 +48,7 @@
         if (!qrValue) return;
 
         // Construct the QR code URL based on the input IP address, feedback type, and file location (SCC300)
-        let qrUrl = `https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=${qrValue}/SCC300/${selectedFeedbackType}.html`;
+        let qrUrl = `https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=http://${qrValue}/SCC300/${selectedFeedbackType}.html`;
 
         qrImg.src = qrUrl;
         qrImg.onload = () => {

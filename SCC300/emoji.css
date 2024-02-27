@@ -19,19 +19,89 @@ label {
     margin-bottom: 10px;
 }
 
+/* Info icon styles */
+.info-icon {
+    position: absolute;
+    bottom: 10px;
+    right: 15px;
+    font-size: 24px;
+}
+
+/* Adjust icon color on hover */
+.info-icon:hover i {
+    color: #666;
+}
+
+/* Tooltip styles */
+.tooltip {
+    visibility: hidden;
+    background-color: #333;
+    color: white;
+    text-align: left;
+    padding: 10px;
+    border-radius: 5px;
+    position: absolute;
+    z-index: 1;
+    bottom: 30px;
+    right: -120px;
+    width: 300px;
+    font-size: 14px;
+}
+
+.tooltip ul {
+    margin: 0;
+    padding: 0;
+}
+
+.tooltip ul li {
+    list-style-type: none;
+    margin-bottom: 5px;
+}
+
+/* Show tooltip on hover */
+.info-icon:hover .tooltip {
+    visibility: visible;
+}
+
+
 .feedback-meter {
     width: 200px;
     height: 100px;
     position: relative;
     margin: 20px auto;
     border-radius: 100px 100px 0 0;
-    overflow: hidden;
     background: conic-gradient(
         from -30deg at 50% 100%,
         #ffd699 0deg 60deg,
         #c2f0c2 60deg 120deg,
         #ffaaaa 120deg 180deg
     );
+    position: relative; /* Add relative positioning */
+    border: 2px solid black; /* Add solid black border */
+}
+
+.inner-semicircle {
+    position: absolute;
+    width: 20px; /* Adjust size as needed */
+    height: 10px; /* Adjust size as needed */
+    bottom: 0px; /* Adjust positioning */
+    left: 50%;
+    transform: translateX(-50%) rotate(180deg); /* Rotate the semicircle */
+    border-radius: 0 0 50px 50px;
+    background-color: black;
+}
+
+/* Update the needle's initial rotation */
+.needle {
+    position: absolute;
+    bottom: 0;
+    left: 50%;
+    width: 2px;
+    height: 50%;
+    background: red;
+    transform-origin: bottom;
+    transform: rotate(-90deg); /* Initial rotation */
+    transition: transform 0.3s ease-in-out;
 }
 
 .emoji-container {
@@ -57,19 +127,19 @@ label {
 }
 
 #emoji1 {
-    left: 25%;
-    transform: translateX(-50%) rotate(0deg);
+    left: 22.5%;
+    transform: translateX(-50%) translateY(30%) rotate(0deg);
 }
 
 #emoji2 {
     left: 50%;
-    transform: translateX(-50%) rotate(0deg);
-    bottom: 20%;
+    transform: translateX(-50%) translateY(-45%) rotate(0deg);
+
 }
 
 #emoji3 {
-    left: 75%;
-    transform: translateX(-50%) rotate(0deg);
+    left: 77.5%;
+    transform: translateX(-50%) translateY(30%) rotate(0deg);
 }
 
 button {
@@ -117,7 +187,65 @@ button:hover {
     /* Add any additional styles for dark mode button */
 }
 
-#qrCodeContainer {
-    width: 200px; /* Adjust the width of the QR code container */
-    height: 200px; /* Adjust the height of the QR code container */
+/* Remove default body margin */
+body {
+    margin: 0;
 }
+
+/* Adjust container styles for smaller resolutions */
+@media screen and (max-width: 425px) {
+    .container {
+        width: 90%;
+        margin: 0 auto; /* Center the container horizontally */
+        padding: 20px;
+        height: calc(100vh - 40px); /* Calculate height to fit screen */
+        display: flex;
+        flex-direction: column;
+        justify-content: center; /* Center elements vertically */
+        align-items: center; /* Center elements horizontally */
+    }
+
+    h2 {
+        margin-top: -50px; /* Reduce margin to move the title higher up */
+        margin-bottom: 20px; /* Add margin below the title */
+    }
+
+    label {
+        margin: 30px 0; /* Reduce spacing between question and meter */
+        margin-bottom: 200px;
+    }
+
+    .feedback-meter {
+        position: relative; /* Change position to relative */
+        margin-bottom: 80px; /* Add margin to separate from question */
+    }
+
+    .navigation {
+        margin-top: 20px; /* Push navigation buttons below the feedback meter */
+    }
+
+    .mode-toggle {
+        margin-top: 20px; /* Add margin to separate from feedback meter */
+    }
+}
+
+
+/* Adjust emoji container for smaller resolutions */
+@media screen and (max-width: 425px) {
+    .emoji-container {
+        position: relative;
+        width: 100%;
+        display: flex;
+        justify-content: center; /* Center emojis horizontally */
+        margin-top: 20px;
+        margin-bottom: 20px;
+    }
+
+    .feedback-meter {
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+    }
+}
+

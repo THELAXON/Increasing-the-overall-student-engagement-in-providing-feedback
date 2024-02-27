@@ -7,26 +7,8 @@
   <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
   <link rel="stylesheet" href="voice.css">
 </head>
-<body>
-
-  <!-- Popup with Instructions -->
-  <div id="instructionPopup" class="dark-mode-page">
-    <div class="popup-content">
-      <div class="close-icon" onclick="closeInstructionPopup()">✕</div>
-      <p>Instructions for giving feedback:</p>
-      <ul>
-        <li>Choose feedback type: Positive/Negative</li>
-        <li>Click the microphone to start voice recognition</li>
-        <li>Type additional comments if needed</li>
-        <li>Submit your feedback</li>
-      </ul>
-    </div>
-  </div>
-
-  <!-- Moon icon for toggling dark mode -->
-  <div id="darkModeToggle" class="material-icons" onclick="toggleDarkMode()">brightness_4</div>
-
-  <div class="container">
+<body class="light-mode">
+  <div class="container">  
     <h1>Speech Feedback Form</h1>
     <p>We value your feedback! Please take a moment to let us know how we're doing.</p>
 
@@ -45,10 +27,29 @@
     
       <input type="submit" value="Submit">
     </form>
+
+    <div class="mode-toggle">
+      <button type="button" id="modeToggleBtn" onclick="toggleMode()">
+          <i id="modeIcon" class="material-icons">dark_mode</i>
+      </button>                
+    </div>
     
     <div id="thankYouMessage" class="hidden">
       <p>Thank you for your feedback!</p>
     </div>
+
+    <!-- Info icon -->
+    <div class="info-icon" onmouseover="showInstructions()" onmouseout="hideInstructions()">
+      <i class="material-icons">info</i>
+      <div class="tooltip" id="tooltip">
+          <ul>
+            <li>Choose feedback type: Positive/Negative</li>
+          <li>Click the microphone to start voice recognition</li>
+          <li>Type additional comments if needed</li>
+          <li>Submit your feedback</li>    
+          </ul>
+      </div>
+  </div>
 
   </div>
 
@@ -73,24 +74,19 @@
       recognition.start();
     }
 
-    function toggleDarkMode() {
-      const body = document.body;
-      const container = document.querySelector('.container');
-      const darkModeToggle = document.getElementById('darkModeToggle');
-      const submitButton = document.querySelector('input[type="submit"]');
+    function toggleMode() {
+            const modeIcon = document.getElementById("modeIcon");
 
-      if (body.classList.contains('dark-mode')) {
-        body.classList.remove('dark-mode');
-        container.classList.remove('dark-mode');
-        submitButton.classList.remove('dark-mode');
-        darkModeToggle.innerText = 'brightness_4'; // Moon icon in light mode
-      } else {
-        body.classList.add('dark-mode');
-        container.classList.add('dark-mode');
-        submitButton.classList.add('dark-mode');
-        darkModeToggle.innerText = 'wb_incandescent'; // Light bulb icon in dark mode
+            if (document.body.classList.contains("dark-mode")) {
+                // Switch to light mode
+                document.body.classList.remove("dark-mode");
+                modeIcon.textContent = "dark_mode";
+            } else {
+                // Switch to dark mode
+                document.body.classList.add("dark-mode");
+                modeIcon.textContent = "light_mode";
+            }
       }
-    }
 
     function submitFeedback(event) {
       event.preventDefault(); // Prevents the form from submitting the traditional way
@@ -107,16 +103,13 @@
       document.getElementById('thankYouMessage').style.display = 'block';
     }
 
-    function closeInstructionPopup() {
-      document.getElementById('instructionPopup').style.display = 'none';
+    function showInstructions() {
+        document.getElementById("tooltip").style.visibility = "visible";
     }
 
-    function showInstructionPopup() {
-      document.getElementById('instructionPopup').style.display = 'flex';
+    function hideInstructions() {
+        document.getElementById("tooltip").style.visibility = "hidden";
     }
-
-    // Display instruction popup when the page loads
-    window.onload = showInstructionPopup;
   </script>
 
 </body>
