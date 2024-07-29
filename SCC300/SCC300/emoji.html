@@ -1,0 +1,215 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Feedback Survey</title>
+    <link rel="stylesheet" href="emoji.css">
+    <link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons">
+</head>
+<body class="light-mode"> <!-- Initially set to light mode -->
+    <div class="container">
+        <h2>Feedback Survey</h2>
+        <form id="feedbackForm" action="emoji_feedback.php" method="post">
+            <label id="questionLabel">How well did you understand today's lecture?</label>
+            <div class="feedback-meter" onclick="selectFeedback(event)">
+                <div class="inner-semicircle"></div> <!-- Add inner semicircle -->
+                <div class="needle"></div>
+                <div class="emoji-container">
+                    <div id="emoji1" class="emoji" data-emoji="😞">😞</div>
+                    <div id="emoji2" class="emoji" data-emoji="😐">😐</div>
+                    <div id="emoji3" class="emoji" data-emoji="😊">😊</div>
+                </div>
+            </div>
+            
+            <!-- Hidden inputs to store selected feedback for each question -->
+            <input type="hidden" name="q1" id="q1" value="">
+            <input type="hidden" name="q2" id="q2" value="">
+            <input type="hidden" name="q3" id="q3" value="">
+
+            <div class="navigation">
+                <button type="button" id="prevButton" onclick="prevQuestion()" style="display: none;">Previous</button>
+                <button type="button" id="nextButton" onclick="nextQuestion()">Next</button>
+                <button type="submit" id="submitButton" style="display: none;">Submit Feedback</button>
+            </div>
+
+            <div class="mode-toggle">
+                <button type="button" id="modeToggleBtn" onclick="toggleMode()">
+                    <i id="modeIcon" class="material-icons">dark_mode</i>
+                </button>                
+            </div>
+
+            <!-- Info icon -->
+            <div class="info-icon" onmouseover="showInstructions()" onmouseout="hideInstructions()">
+                <i class="material-icons">info</i>
+                <div class="tooltip" id="tooltip">
+                    <ul>
+                        <li>Read each question located above the feedback meter</li>
+                        <li>Select your feedback indicated by the color change to confirm your choice</li>
+                        <li>Click next to go to the next question</li>
+                        <li>If you want to change your answer, you can go back to the previous question</li>
+                        <li>Submit your feedback at the end</li>
+                    </ul>
+                </div>
+            </div>
+
+        </form>
+    </div>
+
+    <script>
+        let currentQuestion = 0;
+        const questions = [
+            "How well did you understand today's lecture?",
+            "How engaged were you during the class?",
+            "How clear were the explanations provided?"
+        ];
+
+        document.getElementById("questionLabel").textContent = questions[currentQuestion];
+
+        // Initialize an array to store the selected emojis for each question
+        const selectedEmojis = Array(questions.length).fill(null);
+
+        function prevQuestion() {
+            if (currentQuestion > 0) {
+                currentQuestion--;
+                updateQuestion();
+            }
+        }
+
+        function nextQuestion() {
+            if (currentQuestion < questions.length - 1) {
+                currentQuestion++;
+                updateQuestion();
+            } else {
+                // If it's the last question, submit the form
+                document.getElementById("feedbackForm").submit();
+            }
+        }
+
+        function updateQuestion() {
+            document.getElementById("questionLabel").textContent = questions[currentQuestion];
+
+            // Hide or show previous/next buttons based on the current question
+            document.getElementById("prevButton").style.display = currentQuestion === 0 ? "none" : "inline-block";
+            document.getElementById("nextButton").style.display = currentQuestion === questions.length - 1 ? "none" : "inline-block";
+
+            // Display the submit button on the last question
+            document.getElementById("submitButton").style.display = currentQuestion === questions.length - 1 ? "inline-block" : "none";
+
+            // Reset feedback meter to default
+            resetFeedbackMeter();
+            resetNeedle();
+            
+
+            // Set the selected emoji if previously chosen for this question
+            const selectedEmoji = selectedEmojis[currentQuestion];
+            if (selectedEmoji) {
+                selectEmoji(selectedEmoji);
+            }
+        }
+
+        function selectFeedback(event) {
+            // Calculate the angle of the click relative to the center of the feedback meter
+            const rect = event.currentTarget.getBoundingClientRect();
+            const centerX = rect.left + rect.width / 2;
+            const centerY = rect.top + rect.height / 2;
+            let angleRad = Math.atan2(centerY - event.clientY, event.clientX - centerX);
+            if (event.clientY > centerY) {
+                angleRad = -angleRad;
+            }
+            let angleDeg = angleRad * 180 / Math.PI;
+           
+
+            console.log('Clicked angle:', angleDeg); // Log the clicked angle
+            console.log('CenterX:', centerX); // Log the centerX
+            console.log('CenterY:', centerY); // Log the centerY
+            console.log('Click X:', event.clientX); // Log the X coordinate of the click
+            console.log('Click Y:', event.clientY); // Log the Y coordinate of the click
+
+            // Update gradient colors based on the clicked area
+            if (angleDeg >= -60 && angleDeg < 60) {
+                // Happy area
+                event.currentTarget.style.background = 'conic-gradient(from -30deg at 50% 100%, #ffd699 0deg 60deg, #59AB2B 60deg 120deg, #ffaaaa 120deg 180deg)';
+                // Store selected feedback for this question
+                document.getElementById(`q${currentQuestion + 1}`).value = 'good';
+            } else if (angleDeg >= 60 && angleDeg < 120) {
+                // Neutral area
+                event.currentTarget.style.background = 'conic-gradient(from -30deg at 50% 100%, #f1c232 0deg 60deg, #c2f0c2 60deg 120deg, #ffaaaa 120deg 180deg)';
+                // Store selected feedback for this question
+                document.getElementById(`q${currentQuestion + 1}`).value = 'neutral';
+            } else if (angleDeg >= 120 && angleDeg <= 180) {
+                // Sad area
+                event.currentTarget.style.background = 'conic-gradient(from -30deg at 50% 100%, #ffd699 0deg 60deg, #c2f0c2 60deg 120deg, #f35549 120deg 180deg)';
+                // Store selected feedback for this question
+                document.getElementById(`q${currentQuestion + 1}`).value = 'bad';
+            }
+
+            // Reset gradient colors for other areas
+            document.querySelectorAll('.feedback-meter').forEach(meter => {
+                if (meter !== event.currentTarget) {
+                    meter.style.background = 'conic-gradient(from -30deg at 50% 100%, #ffd699 0deg 60deg, #c2f0c2 60deg 120deg, #ffaaaa 120deg 180deg)';
+                }
+            });
+        }
+        
+        function resetFeedbackMeter() {
+            document.querySelector('.feedback-meter').style.background = 'conic-gradient(from -30deg at 50% 100%, #ffd699 0deg 60deg, #c2f0c2 60deg 120deg, #ffaaaa 120deg 180deg)';
+        }
+
+        function resetNeedle() {
+            document.querySelector('.needle').style.transform = 'rotate(-90deg)';
+        }
+
+// Call this function to reset the needle
+// resetNeedle();
+        // Update the rotation angles
+        document.querySelector('#emoji1').addEventListener('click', function() {
+            document.querySelector('.needle').style.transform = 'rotate(-60deg)';
+        });
+
+        document.querySelector('#emoji2').addEventListener('click', function() {
+            document.querySelector('.needle').style.transform = 'rotate(0deg)';
+        });
+
+        document.querySelector('#emoji3').addEventListener('click', function() {
+            document.querySelector('.needle').style.transform = 'rotate(60deg)';
+        });
+
+        function selectEmoji(emoji) {
+            // Remove 'selected' class from all emojis
+            document.querySelectorAll('.emoji').forEach(emoji => {
+                emoji.classList.remove('selected');
+            });
+
+            // Add 'selected' class to the clicked emoji
+            const selectedEmojiElement = document.querySelector(`[data-emoji="${emoji}"]`);
+            if (selectedEmojiElement) {
+                selectedEmojiElement.classList.add('selected');
+            }
+        }
+
+        function toggleMode() {
+            const modeIcon = document.getElementById("modeIcon");
+
+            if (document.body.classList.contains("dark-mode")) {
+                // Switch to light mode
+                document.body.classList.remove("dark-mode");
+                modeIcon.textContent = "dark_mode";
+            } else {
+                // Switch to dark mode
+                document.body.classList.add("dark-mode");
+                modeIcon.textContent = "light_mode";
+            }
+        }
+
+        function showInstructions() {
+            document.getElementById("tooltip").style.visibility = "visible";
+        }
+
+        function hideInstructions() {
+            document.getElementById("tooltip").style.visibility = "hidden";
+        }
+
+    </script>
+</body>
+</html>

@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Speech Feedback Form</title>
+  <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+  <link rel="stylesheet" href="voice.css">
+</head>
+<body class="light-mode">
+  <div class="container">  
+    <h1>Speech Feedback Form</h1>
+    <p>We value your feedback! Please take a moment to let us know how we're doing.</p>
+
+    <form id="feedbackForm" action="voice_feedback.php" method="post">
+      <label>
+        <input type="radio" name="feedbackType" value="positive"> Positive
+      </label>
+      <label>
+        <input type="radio" name="feedbackType" value="negative"> Negative
+      </label>
+    
+      <div class="input-container">
+        <i id="microphoneIcon" class="material-icons" onclick="startSpeechRecognition()">mic</i>
+        <textarea id="feedbackText" name="feedbackText" rows="4" placeholder="Your feedback will be transcribed here..."></textarea>
+      </div>
+    
+      <input type="submit" value="Submit">
+    </form>
+
+    <div class="mode-toggle">
+      <button type="button" id="modeToggleBtn" onclick="toggleMode()">
+          <i id="modeIcon" class="material-icons">dark_mode</i>
+      </button>                
+    </div>
+    
+    <div id="thankYouMessage" class="hidden">
+      <p>Thank you for your feedback!</p>
+    </div>
+
+    <!-- Info icon -->
+    <div class="info-icon" onmouseover="showInstructions()" onmouseout="hideInstructions()">
+      <i class="material-icons">info</i>
+      <div class="tooltip" id="tooltip">
+          <ul>
+            <li>Choose feedback type: Positive/Negative</li>
+          <li>Click the microphone to start voice recognition</li>
+          <li>Type additional comments if needed</li>
+          <li>Submit your feedback</li>    
+          </ul>
+      </div>
+  </div>
+
+  </div>
+
+  <script>
+    function startSpeechRecognition() {
+      var recognition = new webkitSpeechRecognition() || new SpeechRecognition();
+      recognition.lang = 'en-US';
+      recognition.interimResults = true;
+
+      recognition.onresult = function(event) {
+        var transcript = Array.from(event.results)
+          .map(result => result[0].transcript)
+          .join('');
+
+        document.getElementById('feedbackText').value = transcript;
+      };
+
+      recognition.onend = function() {
+        recognition.stop();
+      };
+
+      recognition.start();
+    }
+
+    function toggleMode() {
+            const modeIcon = document.getElementById("modeIcon");
+
+            if (document.body.classList.contains("dark-mode")) {
+                // Switch to light mode
+                document.body.classList.remove("dark-mode");
+                modeIcon.textContent = "dark_mode";
+            } else {
+                // Switch to dark mode
+                document.body.classList.add("dark-mode");
+                modeIcon.textContent = "light_mode";
+            }
+      }
+
+    function submitFeedback(event) {
+      event.preventDefault(); // Prevents the form from submitting the traditional way
+
+      const feedbackType = document.querySelector('input[name="feedbackType"]:checked');
+      const feedbackText = document.getElementById('feedbackText').value;
+
+      // You can process and store this feedback data in your database here
+      console.log("Feedback Type:", feedbackType.value);
+      console.log("Speech Feedback:", feedbackText);
+
+      // Display thank you message
+      document.getElementById('feedbackForm').style.display = 'none';
+      document.getElementById('thankYouMessage').style.display = 'block';
+    }
+
+    function showInstructions() {
+        document.getElementById("tooltip").style.visibility = "visible";
+    }
+
+    function hideInstructions() {
+        document.getElementById("tooltip").style.visibility = "hidden";
+    }
+  </script>
+
+</body>
+</html>

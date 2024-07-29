@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="wordcloud.css">
+    <title>Anonymous Word Cloud Feedback Form</title>
+    <script src="https://d3js.org/d3.v5.min.js"></script>
+    <script src="https://unpkg.com/d3-cloud"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap');
+    </style>
+</head>
+<body>
+    <div class="container" id="form-container">
+        <h1>Feedback Form</h1>
+        <form action="wordcloud_feedback.php" method="post">
+            <input type="text" id="word1" name="word1" placeholder="Word 1" required>
+            <input type="text" id="word2" name="word2" placeholder="Word 2" required>
+            <input type="text" id="word3" name="word3" placeholder="Word 3" required>
+            <button type="submit">Submit</button>
+        </form>
+    </div>
+    <div id="wordcloud-container" style="display: none;">
+        <!-- Word cloud will be displayed here after submitting the form -->
+    </div>
+
+<script>
+document.addEventListener("DOMContentLoaded", function () {
+    var formContainer = document.getElementById("form-container");
+    var wordcloudContainer = document.getElementById("wordcloud-container");
+
+    function createWordCloud(words) {
+        var layout = d3.layout.cloud()
+            .size([800, 800])
+            .words(words)
+            .padding(5)
+            .rotate(function() { return ~~(Math.random() * 2) * 90; })
+            .font("Poppins")
+            .fontSize(function(d) { return d.size; })
+            .on("end", draw);
+
+        layout.start();
+
+        function draw(words) {
+            d3.select("#wordcloud-container").append("svg")
+                .attr("width", layout.size()[0])
+                .attr("height", layout.size()[1])
+                .append("g")
+                .attr("transform", "translate(" + layout.size()[0] / 2 + "," + layout.size()[1] / 2 + ")")
+                .selectAll("text")
+                .data(words)
+                .enter().append("text")
+                .style("font-size", function(d) { return d.size + "px"; })
+                .style("font-family", "Poppins")
+                .style("fill", function(d, i) { return getRandomColor(); })
+                .attr("text-anchor", "middle")
+                .attr("transform", function(d) {
+                    return "translate(" + [d.x, d.y] + ")rotate(" + d.rotate + ")";
+                })
+                .text(function(d) { return d.text; });
+        }
+
+        // Hide the form and show the word cloud
+        formContainer.style.display = "none";
+        wordcloudContainer.style.display = "block";
+    }
+
+    function getRandomColor() {
+        var letters = '0123456789ABCDEF';
+        var color = '#';
+        for (var i = 0; i < 6; i++) {
+            color += letters[Math.floor(Math.random() * 16)];
+        }
+        return color;
+    }
+
+    document.querySelector("form").addEventListener("submit", function (event) {
+        event.preventDefault();
+
+        var formData = new FormData(event.target);
+
+        fetch('wordcloud_feedback.php', {
+            method: 'POST',
+            body: formData
+        })
+        .then(response => response.json())
+        .then(data => {
+            fetch('wordcloud_report.php')
+                .then(response => response.json())
+                .then(data => {
+                    // Calculate word frequencies
+                    var wordFreq = {};
+                    data.forEach(word => {
+                        wordFreq[word] = (wordFreq[word] || 0) + 1;
+                    });
+
+                    // Convert word frequencies to word cloud format
+                    var words = Object.keys(wordFreq).map(word => {
+                        return { text: word, size: wordFreq[word] * 10 }; // Adjust size as needed
+                    });
+
+                    // Clear the word cloud container
+                    d3.select("#wordcloud-container").html("");
+                    // Create a new word cloud
+                    createWordCloud(words);
+                })
+                .catch(error => console.error('Error fetching feedback:', error));
+        })
+        .catch(error => console.error('Error submitting feedback:', error));
+    });
+});
+</script>
+</body>
+</html>
